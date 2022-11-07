@@ -50,3 +50,4 @@ make testacc
 # History
 
 This repository was built on the [Terraform Plugin Framework](https://github.com/hashicorp/terraform-plugin-framework). 
+Follow this [Tutorial](https://developer.hashicorp.com/terraform/tutorials/providers-plugin-framework/providers-plugin-framework-provider) for an overview.

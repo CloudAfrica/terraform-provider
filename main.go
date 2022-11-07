@@ -5,7 +5,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/CloudAfrica/terraform-provider/cloudafrica"
+	"github.com/CloudAfrica/terraform-provider-cloudafrica/cloudafrica"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
 
