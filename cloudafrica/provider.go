@@ -158,6 +158,7 @@ func (p *cloudafricaProvider) Configure(ctx context.Context, req provider.Config
 func (p *cloudafricaProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewServersDataSource,
+		NewImageDataSource,
 	}
 }
 
