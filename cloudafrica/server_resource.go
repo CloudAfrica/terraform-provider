@@ -11,34 +11,23 @@ import (
 )
 
 var (
-	_ resource.Resource              = &ServersResource{}
-	_ resource.ResourceWithConfigure = &ServersResource{}
+	_ resource.Resource              = &ServerResource{}
+	_ resource.ResourceWithConfigure = &ServerResource{}
 )
 
-// ServersResourceModel maps the data source schema data.
-type ServersResourceModel struct {
-	Servers []serversModel `tfsdk:"servers"`
+func NewServerResource() resource.Resource {
+	return &ServerResource{}
 }
 
-// serversModel maps servers schema data.
-type serversModel struct {
-	ID   types.Int64  `tfsdk:"id"`
-	Name types.String `tfsdk:"name"`
-}
-
-func NewServersResource() resource.Resource {
-	return &ServersResource{}
-}
-
-type ServersResource struct {
+type ServerResource struct {
 	client *TFClient
 }
 
-func (d *ServersResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_servers"
+func (d *ServerResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_server"
 }
 
-func (d *ServersResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (d *ServerResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			"servers": {
@@ -58,8 +47,8 @@ func (d *ServersResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagn
 	}, nil
 }
 
-func (d *ServersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state ServersResourceModel
+func (d *ServerResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state ServerResourceModel
 
 	servers_resp, _, err := d.client.Client.ServerApi.ListServers(d.client.Auth).Execute()
 	if err != nil {
@@ -74,7 +63,7 @@ func (d *ServersResource) Read(ctx context.Context, req resource.ReadRequest, re
 	servers := servers_resp.Servers
 	fmt.Println(servers)
 	for _, server := range servers {
-		serverstate := serversModel{
+		serverstate := ServerModel{
 			ID:   types.Int64Value(int64(server.Id)),
 			Name: types.StringValue(server.Name),
 		}
@@ -97,7 +86,7 @@ func (d *ServersResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 }
 
-func (d *ServersResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
+func (d *ServerResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -105,7 +94,7 @@ func (d *ServersResource) Configure(_ context.Context, req resource.ConfigureReq
 	d.client = req.ProviderData.(*TFClient)
 }
 
-func (r *ServersResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	//	var plan serversModel
 	//	diags := req.Plan.Get(ctx, &plan)
@@ -171,8 +160,8 @@ func (r *ServersResource) Create(ctx context.Context, req resource.CreateRequest
 	//	}
 }
 
-func (r *ServersResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *ServerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 }
 
-func (r *ServersResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *ServerResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 }

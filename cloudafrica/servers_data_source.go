@@ -32,11 +32,31 @@ func (d *ServersDataSource) Metadata(_ context.Context, req datasource.MetadataR
 	resp.TypeName = req.ProviderTypeName + "_servers"
 }
 
-func (d *ServersDataSource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
-			"servers": {
+func ServerSchema() map[string]tfsdk.Attribute {
+
+	return map[string]tfsdk.Attribute(map[string]tfsdk.Attribute{
+			"id": {
+				Type:     types.Int64Type,
 				Computed: true,
+			},
+			"name": {
+				Type:     types.StringType,
+				Required: true,
+			},
+			"state": {
+				Type:     types.StringType,
+				Required: true,
+			},
+			"cpus": {
+				Type:     types.Int64Type,
+				Required: true,
+			},
+			"ram_mib": {
+				Type:     types.Int64Type,
+				Required: true,
+			},
+			"ssh_keys": {
+				Required: true,
 				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
 					"id": {
 						Type:     types.Int64Type,
@@ -46,45 +66,33 @@ func (d *ServersDataSource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Dia
 						Type:     types.StringType,
 						Required: true,
 					},
-					"state": {
+					"body": {
 						Type:     types.StringType,
 						Required: true,
 					},
-					"cpus": {
+				}),
+			},
+			"disks": {
+				Required: true,
+				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
+					"id": {
 						Type:     types.Int64Type,
-						Required: true,
-					},
-					"ram_mib": {
-						Type:     types.Int64Type,
-						Required: true,
-					},
-					"ssh_keys": {
-						Required: true,
-						Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-							"id": {
-								Type:     types.Int64Type,
-								Computed: true,
-							},
-							"name": {
-								Type:     types.StringType,
-								Required: true,
-							},
-							"body": {
-								Type:     types.StringType,
-								Required: true,
-							},
-						}),
-					},
-					"disks": {
-						Required: true,
-						Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-							"id": {
-								Type:     types.Int64Type,
-								Computed: true,
-							},
-						}),
+						Computed: true,
 					},
 				}),
+			},
+		}),
+
+}
+
+func (d *ServersDataSource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
+	return tfsdk.Schema{
+		Attributes: map[string]tfsdk.Attribute{
+			"servers": {
+				Computed: true,
+				Attributes: tfsdk.ListNestedAttributes(
+					Attributes: ServerSchema(),
+				),
 			},
 		},
 	}, nil
