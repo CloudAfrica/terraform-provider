@@ -48,7 +48,7 @@ func (d *ServerResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagno
 }
 
 func (d *ServerResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state ServerResourceModel
+	var state ServerModel
 
 	servers_resp, _, err := d.client.Client.ServerApi.ListServers(d.client.Auth).Execute()
 	if err != nil {
@@ -75,7 +75,7 @@ func (d *ServerResource) Read(ctx context.Context, req resource.ReadRequest, res
 		//	})
 		//}
 
-		state.Servers = append(state.Servers, serverstate)
+		state = serverstate
 	}
 
 	// Set state

@@ -159,12 +159,13 @@ func (p *cloudafricaProvider) DataSources(_ context.Context) []func() datasource
 	return []func() datasource.DataSource{
 		NewServersDataSource,
 		NewImageDataSource,
+		NewBillingAccountsDataSource,
 	}
 }
 
 // Resources defines the resources implemented in the provider.
 func (p *cloudafricaProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewServersResource,
+		NewServerResource,
 	}
 }
