@@ -33,56 +33,54 @@ func (d *ServersDataSource) Metadata(_ context.Context, req datasource.MetadataR
 }
 
 func ServerSchema() map[string]tfsdk.Attribute {
-
 	return map[string]tfsdk.Attribute(map[string]tfsdk.Attribute{
-			"id": {
-				Type:     types.Int64Type,
-				Computed: true,
-			},
-			"name": {
-				Type:     types.StringType,
-				Required: true,
-			},
-			"state": {
-				Type:     types.StringType,
-				Required: true,
-			},
-			"cpus": {
-				Type:     types.Int64Type,
-				Required: true,
-			},
-			"ram_mib": {
-				Type:     types.Int64Type,
-				Required: true,
-			},
-			"ssh_keys": {
-				Required: true,
-				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-					"id": {
-						Type:     types.Int64Type,
-						Computed: true,
-					},
-					"name": {
-						Type:     types.StringType,
-						Required: true,
-					},
-					"body": {
-						Type:     types.StringType,
-						Required: true,
-					},
-				}),
-			},
-			"disks": {
-				Required: true,
-				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-					"id": {
-						Type:     types.Int64Type,
-						Computed: true,
-					},
-				}),
-			},
-		}),
-
+		"id": {
+			Type:     types.Int64Type,
+			Computed: true,
+		},
+		"name": {
+			Type:     types.StringType,
+			Required: true,
+		},
+		"state": {
+			Type:     types.StringType,
+			Required: true,
+		},
+		"cpus": {
+			Type:     types.Int64Type,
+			Required: true,
+		},
+		"ram_mib": {
+			Type:     types.Int64Type,
+			Required: true,
+		},
+		"ssh_keys": {
+			Required: true,
+			Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
+				"id": {
+					Type:     types.Int64Type,
+					Computed: true,
+				},
+				"name": {
+					Type:     types.StringType,
+					Required: true,
+				},
+				"body": {
+					Type:     types.StringType,
+					Required: true,
+				},
+			}),
+		},
+		"disks": {
+			Required: true,
+			Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
+				"id": {
+					Type:     types.Int64Type,
+					Computed: true,
+				},
+			}),
+		},
+	})
 }
 
 func (d *ServersDataSource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
@@ -91,7 +89,7 @@ func (d *ServersDataSource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Dia
 			"servers": {
 				Computed: true,
 				Attributes: tfsdk.ListNestedAttributes(
-					Attributes: ServerSchema(),
+					ServerSchema(),
 				),
 			},
 		},
