@@ -6,7 +6,7 @@ import (
 	"github.com/CloudAfrica/client"
 )
 
-// serversModel maps servers schema data.
+// ServerModel maps servers schema data.
 type ServerModel struct {
 	ID      types.Int64       `tfsdk:"id"`
 	Name    types.String      `tfsdk:"name"`
@@ -17,26 +17,26 @@ type ServerModel struct {
 	Disks   []ServerDiskModel `tfsdk:"disks"`
 }
 
-func ServerModelFromApi(server cloudafrica.ListServers200ResponseServersInner) ServerModel {
+func ServerModelFromApi(server cloudafrica.Server) ServerModel {
 	s := ServerModel{
-		ID:     types.Int64Value(int64(server.Id)),
-		Name:   types.StringValue(server.Name),
-		State:  types.StringValue(server.State),
-		CPUs:   types.Int64Value(int64(server.Cpus)),
-		RamMiB: types.Int64Value(int64(server.RamMib)),
+		ID:     types.Int64Value(int64(*server.Id)),
+		Name:   types.StringValue(*server.Name),
+		State:  types.StringValue(*server.State),
+		CPUs:   types.Int64Value(int64(*server.Cpus)),
+		RamMiB: types.Int64Value(int64(*server.RamMib)),
 	}
 
 	for _, disk := range server.Disks {
 		s.Disks = append(s.Disks, ServerDiskModel{
-			ID: types.Int64Value(disk.Id),
+			ID: types.Int64Value(*disk.Id),
 		})
 	}
 
 	for _, key := range server.SshKeys {
 		s.SSHKeys = append(s.SSHKeys, SSHKeyModel{
-			ID:   types.Int64Value(key.Id),
-			Name: types.StringValue(key.Name),
-			Body: types.StringValue(key.Body),
+			ID:   types.Int64Value(*key.Id),
+			Name: types.StringValue(*key.Name),
+			Body: types.StringValue(*key.Body),
 		})
 	}
 

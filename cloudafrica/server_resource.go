@@ -2,10 +2,12 @@ package cloudafrica
 
 import (
 	"context"
+	cloudafrica "github.com/CloudAfrica/client"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"strconv"
 )
 
@@ -33,7 +35,6 @@ func (d *ServerResource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagno
 }
 
 func (r *ServerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	//resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 	id, err := strconv.ParseInt(req.ID, 10, 64)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -85,68 +86,70 @@ func (d *ServerResource) Configure(_ context.Context, req resource.ConfigureRequ
 
 func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	//	var plan serversModel
-	//	diags := req.Plan.Get(ctx, &plan)
-	//	resp.Diagnostics.Append(diags...)
-	//	if resp.Diagnostics.HasError() {
-	//		return
+	var plan ServerModel
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var networkID int64 = 17592186045491
+	var sshKeyID int64 = 17592186045481
+	var billingAccountId int64 = 17592186045487
+	var ImageID int64 = 17592186045479
+
+	// Generate API request body from plan
+	var order = cloudafrica.ServerOrder{
+		ImageId:           ImageID,
+		Name:              "andre-test",
+		Cpus:              1,
+		RamMib:            1024,
+		BillingAccountId:  billingAccountId,
+		Disks:             []cloudafrica.ServerOrderDisk{cloudafrica.ServerOrderDisk{SizeMb: 10000}},
+		NetworkInterfaces: []cloudafrica.ServerOrderNetworkInterface{cloudafrica.ServerOrderNetworkInterface{Primary: true, NetworkId: networkID}},
+		SshKeyIds:         []int64{sshKeyID}}
+	//for _, item := range plan.Items {
+	//	items = append(items, hashicups.OrderItem{
+	//		Coffee: hashicups.Coffee{
+	//			ID: int(item.Coffee.ID.ValueInt64()),
+	//		},
+	//		Quantity: int(item.Quantity.ValueInt64()),
+	//	})
+	//}
+
+	// Create new order
+	orderResp, _, err := r.client.Client.ServerApi.CreateServer(r.client.Auth).ServerOrder(order).Execute()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error creating order",
+			"Could not create order, unexpected error: "+err.Error(),
+		)
+		return
+	}
+
+	// Map response body to schema and populate Computed attribute values
+	plan.ID = types.Int64Value(orderResp.ServerId)
+	//for orderItemIndex, orderItem := range order.Items {
+	//	plan.Items[orderItemIndex] = orderItemModel{
+	//		Coffee: orderItemCoffeeModel{
+	//			ID:          types.Int64Value(int64(orderItem.Coffee.ID)),
+	//			Name:        types.StringValue(orderItem.Coffee.Name),
+	//			Teaser:      types.StringValue(orderItem.Coffee.Teaser),
+	//			Description: types.StringValue(orderItem.Coffee.Description),
+	//			Price:       types.Float64Value(orderItem.Coffee.Price),
+	//			Image:       types.StringValue(orderItem.Coffee.Image),
+	//		},
+	//		Quantity: types.Int64Value(int64(orderItem.Quantity)),
 	//	}
-	//
-	//	var networkID int64 = 17592186045489
-	//	var sshKeyID int64 = 17592186045481
-	//
-	//	// Generate API request body from plan
-	//	var order = cloudafrica.ServerOrder{
-	//		17592186045479,
-	//		17592186045485,
-	//		"andre-test",
-	//		1,
-	//		1024,
-	//		[]cloudafrica.ServerOrderDisk{cloudafrica.ServerOrderDisk{0, 10000}},
-	//		[]cloudafrica.ServerOrderNetworkInterface{cloudafrica.ServerOrderNetworkInterface{0, true, networkID}},
-	//		[]int64{sshKeyID}}
-	//	//for _, item := range plan.Items {
-	//	//	items = append(items, hashicups.OrderItem{
-	//	//		Coffee: hashicups.Coffee{
-	//	//			ID: int(item.Coffee.ID.ValueInt64()),
-	//	//		},
-	//	//		Quantity: int(item.Quantity.ValueInt64()),
-	//	//	})
-	//	//}
-	//
-	//	// Create new order
-	//	orderResp, err := r.client.Servers.Create(order)
-	//	if err != nil {
-	//		resp.Diagnostics.AddError(
-	//			"Error creating order",
-	//			"Could not create order, unexpected error: "+err.Error(),
-	//		)
-	//		return
-	//	}
-	//
-	//	// Map response body to schema and populate Computed attribute values
-	//	plan.ID = types.Int64Value(orderResp.ServerID)
-	//	//for orderItemIndex, orderItem := range order.Items {
-	//	//	plan.Items[orderItemIndex] = orderItemModel{
-	//	//		Coffee: orderItemCoffeeModel{
-	//	//			ID:          types.Int64Value(int64(orderItem.Coffee.ID)),
-	//	//			Name:        types.StringValue(orderItem.Coffee.Name),
-	//	//			Teaser:      types.StringValue(orderItem.Coffee.Teaser),
-	//	//			Description: types.StringValue(orderItem.Coffee.Description),
-	//	//			Price:       types.Float64Value(orderItem.Coffee.Price),
-	//	//			Image:       types.StringValue(orderItem.Coffee.Image),
-	//	//		},
-	//	//		Quantity: types.Int64Value(int64(orderItem.Quantity)),
-	//	//	}
-	//	//}
-	//	//plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
-	//
-	//	// Set state to fully populated data
-	//	diags = resp.State.Set(ctx, plan)
-	//	resp.Diagnostics.Append(diags...)
-	//	if resp.Diagnostics.HasError() {
-	//		return
-	//	}
+	//}
+	//plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
+
+	// Set state to fully populated data
+	diags = resp.State.Set(ctx, plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *ServerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {

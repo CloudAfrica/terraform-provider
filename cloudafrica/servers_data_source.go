@@ -99,7 +99,7 @@ func (d *ServersDataSource) GetSchema(_ context.Context) (tfsdk.Schema, diag.Dia
 func (d *ServersDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state ServersDataSourceModel
 
-	servers_resp, _, err := d.client.Client.ServerApi.ListServers(d.client.Auth).Execute()
+	serversResp, _, err := d.client.Client.ServerApi.ListServers(d.client.Auth).Execute()
 	if err != nil {
 		tflog.Error(ctx, "Error Reading servers resource", map[string]any{"err": err.Error()})
 		resp.Diagnostics.AddError(
@@ -110,32 +110,12 @@ func (d *ServersDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	}
 
 	// Map response body to model
-	servers := servers_resp.Servers
+	servers := serversResp.Servers
 	tflog.Trace(ctx, "Got servers", map[string]any{"servers": servers})
 	for _, server := range servers {
-		serverstate := ServerModel{
-			ID:     types.Int64Value(int64(server.Id)),
-			Name:   types.StringValue(server.Name),
-			State:  types.StringValue(server.State),
-			CPUs:   types.Int64Value(int64(server.Cpus)),
-			RamMiB: types.Int64Value(int64(server.RamMib)),
-		}
+		serverState := ServerModelFromApi(server)
 
-		for _, disk := range server.Disks {
-			serverstate.Disks = append(serverstate.Disks, ServerDiskModel{
-				ID: types.Int64Value(disk.Id),
-			})
-		}
-
-		for _, key := range server.SshKeys {
-			serverstate.SSHKeys = append(serverstate.SSHKeys, SSHKeyModel{
-				ID:   types.Int64Value(key.Id),
-				Name: types.StringValue(key.Name),
-				Body: types.StringValue(key.Body),
-			})
-		}
-
-		state.Servers = append(state.Servers, serverstate)
+		state.Servers = append(state.Servers, serverState)
 	}
 
 	// Set state
