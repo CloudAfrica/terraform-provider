@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strconv"
+	"time"
 )
 
 var (
@@ -101,7 +103,7 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 	// Generate API request body from plan
 	var order = cloudafrica.ServerOrder{
 		ImageId:           ImageID,
-		Name:              "andre-test",
+		Name:              plan.Name.ValueString(),
 		Cpus:              1,
 		RamMib:            1024,
 		BillingAccountId:  billingAccountId,
@@ -129,6 +131,35 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	// Map response body to schema and populate Computed attribute values
 	plan.ID = types.Int64Value(orderResp.ServerId)
+
+	err = orderResp.Wait(
+		r.client.Client,
+		r.client.Auth,
+		20,
+		1*time.Second,
+	)
+
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error waiting for order task to finish",
+			"Could not create order, unexpected error: "+err.Error(),
+		)
+		return
+	}
+
+	server, _, err := r.client.Client.ServerApi.GetServer(r.client.Auth, orderResp.ServerId).Execute()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error fetching server after order created",
+			"Could not import server in TF, unexpected error: "+err.Error(),
+		)
+		return
+	}
+
+	plan = ServerModelFromApi(server.Server)
+
+	tflog.Info(ctx, "Server:", map[string]any{"server": plan})
+
 	//for orderItemIndex, orderItem := range order.Items {
 	//	plan.Items[orderItemIndex] = orderItemModel{
 	//		Coffee: orderItemCoffeeModel{
