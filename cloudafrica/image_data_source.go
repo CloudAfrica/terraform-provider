@@ -74,9 +74,9 @@ func (d *ImageDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	tflog.Trace(ctx, "Got images", map[string]any{"images": images})
 	for _, image := range images {
 		imagestate := ImageModel{
-			ID:      types.Int64Value(int64(image.Id)),
-			OS:      types.StringValue(image.Os),
-			Version: types.StringValue(image.Version),
+			ID:      types.Int64Value(int64(*image.Id)),
+			OS:      types.StringValue(*image.Os),
+			Version: types.StringValue(*image.Version),
 		}
 
 		state.Images = append(state.Images, imagestate)

@@ -70,8 +70,8 @@ func (d *BillingAccountsDataSource) Read(ctx context.Context, req datasource.Rea
 	tflog.Trace(ctx, "Got billing-accounts", map[string]any{"items": items})
 	for _, item := range items {
 		itemstate := BillingAccountModel{
-			ID:   types.Int64Value(int64(item.Id)),
-			Name: types.StringValue(item.Name),
+			ID:   types.Int64Value(int64(*item.Id)),
+			Name: types.StringValue(*item.Name),
 		}
 
 		state.BillingAccounts = append(state.BillingAccounts, itemstate)
